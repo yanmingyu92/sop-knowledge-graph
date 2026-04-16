@@ -178,7 +178,8 @@ If you use this pipeline in your research, please cite:
   author  = {Yan, Jaime},
   journal = {Journal of the Society for Clinical Data Management},
   year    = {2026},
-  note    = {Submitted}
+  note    = {Submitted},
+  doi     = {10.5281/zenodo.19616566}
 }
 ```
 

@@ -26,7 +26,7 @@ A six-stage automated pipeline that transforms pharmaceutical Standard Operating
 
 ## Production Results
 
-The pipeline was validated on a corpus of 253 pharmaceutical SOPs from a large organization's biostatistics division.
+The pipeline was validated on a corpus of 253 SOPs from a large organization's biostatistics division.
 
 | Metric | Value |
 |--------|-------|
@@ -100,7 +100,7 @@ Generates a self-contained HTML file with Cytoscape.js graph visualization, full
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/sop-knowledge-graph.git
+git clone https://github.com/yanmingyu92/sop-knowledge-graph.git
 cd sop-knowledge-graph
 
 # Install dependencies

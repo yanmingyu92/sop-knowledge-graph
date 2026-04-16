@@ -1,0 +1,48 @@
+# =============================================================================
+# SOP Knowledge Graph Pipeline - Configuration
+# =============================================================================
+# Copy this file to config.yaml and fill in your values.
+
+# -- SharePoint SOP index page (optional: only needed for Stage 0 scraping) --
+sharepoint:
+  url: "https://your-sharepoint-site.com/sites/SOPs/SitePages/SOPs.aspx"
+
+# -- Document management system (optional: only needed for Stage 0 download) --
+document_system:
+  dns: "your-instance.example.com"
+  api_version: "v24.3"
+  username: ""         # override with env var DMS_USERNAME
+  password: ""         # override with env var DMS_PASSWORD
+  # HTTP/HTTPS proxy (leave blank to use system proxy auto-detect)
+  proxy: ""
+
+# -- Input / Output paths --
+paths:
+  source_dir: "path/to/your/sop/documents"
+  output_dir: "output"
+
+# -- Pipeline --
+pipeline:
+  skip_download: true   # Set to false only if using document_system
+  ebook_filename: "SOPs_eBook"
+
+# -- PDF eBook settings --
+pdf_ebook:
+  title: "Standard Operating Procedures"
+  subtitle: "Workflow-Based User Manual"
+  author: "Your Organization"
+  sort_alphabetically: true
+  add_toc_page: true
+  cover_font_size: 36
+  toc_font_size: 13
+
+# -- EPUB eBook settings --
+epub_ebook:
+  title: "Standard Operating Procedures"
+  author: "Your Organization"
+  language: "en"
+
+# -- Logging --
+logging:
+  level: INFO
+  log_file: "output/pipeline.log"

@@ -1,0 +1,13 @@
+# Core dependencies
+python-docx>=1.1.0      # DOCX parsing
+PyMuPDF>=1.24.0         # PDF parsing and eBook generation
+pdfplumber>=0.11.0      # PDF table extraction
+PyYAML>=6.0             # YAML config loading
+python-dotenv>=1.0.0    # Environment variable management
+Jinja2>=3.1.0           # HTML template rendering
+
+# Optional: Word COM automation (Windows only)
+# pywin32>=306           # .doc → .docx/.pdf conversion
+
+# Optional: EPUB generation
+# ebooklib>=0.18         # EPUB eBook output

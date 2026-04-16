@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOP Knowledge Explorer</title>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.33.2/dist/cytoscape.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.1/dist/cdn.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff; --bg-panel: #f8f9fa; --bg-hover: #e9ecef;
+  --text: #212529; --text-muted: #6c757d; --border: #dee2e6;
+  --accent: #0d6efd; --accent-light: #e7f1ff;
+}
+[data-theme="dark"] {
+  --bg: #1a1a2e; --bg-panel: #16213e; --bg-hover: #0f3460;
+  --text: #e0e0e0; --text-muted: #a0a0a0; --border: #333;
+  --accent: #4cc9f0; --accent-light: #1a1a3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg); color: var(--text); min-width: 1200px;
+}
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.theme-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 4px 10px; color: var(--text); cursor: pointer; font-size: 13px;
+}
+.main { display: flex; height: calc(100vh - 75px); }
+.left-panel {
+  width: 260px; min-width: 260px; border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 12px; background: var(--bg-panel);
+}
+.search-box {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px;
+  font-size: 13px; background: var(--bg); color: var(--text); margin-bottom: 12px;
+}
+.search-box:focus { outline: 2px solid var(--accent); }
+.search-results {
+  max-height: 300px; overflow-y: auto; border: 1px solid var(--border);
+  border-radius: 4px; margin-bottom: 12px; background: var(--bg);
+}
+.search-result {
+  padding: 6px 10px; cursor: pointer; font-size: 12px; border-bottom: 1px solid var(--border);
+}
+.search-result:hover { background: var(--bg-hover); }
+.search-result .type-badge {
+  display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px;
+  background: var(--accent-light); color: var(--accent); margin-right: 4px;
+}
+.section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 12px 0 6px; text-transform: uppercase; }
+.wf-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-bottom: 2px;
+}
+.wf-item:hover { background: var(--bg-hover); }
+.wf-item.active { background: var(--accent-light); font-weight: 600; }
+.wf-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.wf-count { font-size: 11px; color: var(--text-muted); }
+.filter-group { margin-top: 8px; }
+.filter-group label { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 0; cursor: pointer; }
+.center-panel { flex: 1; position: relative; }
+#cy { width: 100%; height: 100%; }
+.graph-controls {
+  position: absolute; top: 8px; left: 8px; display: flex; gap: 4px; z-index: 10;
+}
+.graph-btn {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--bg-panel); color: var(--text); cursor: pointer; font-size: 12px;
+}
+.graph-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.graph-stats {
+  position: absolute; bottom: 8px; left: 8px; font-size: 11px; color: var(--text-muted); z-index: 10;
+}
+.tooltip {
+  position: absolute; background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 6px 10px; font-size: 12px; pointer-events: none;
+  z-index: 100; display: none; max-width: 300px;
+}
+.right-panel {
+  width: 380px; min-width: 380px; border-left: 1px solid var(--border);
+  overflow-y: auto; padding: 16px; background: var(--bg-panel);
+}
+.detail-empty { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 14px; }
+.detail-header { margin-bottom: 12px; }
+.detail-id { font-size: 20px; font-weight: 700; }
+.detail-title { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+.detail-meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12px; margin: 12px 0; }
+.detail-meta dt { font-weight: 600; color: var(--text-muted); }
+.detail-meta dd { margin: 0; }
+.wf-tag {
+  display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  margin: 2px 2px 2px 0; cursor: pointer; transition: opacity 0.15s;
+}
+.wf-tag:hover { opacity: 0.7; }
+.section-list { list-style: none; margin: 8px 0; }
+.section-item { padding: 4px 0 4px; font-size: 12px; border-bottom: 1px solid var(--border); cursor: default; }
+.section-item .level-indent { display: inline-block; }
+.pdf-section { margin: 12px 0; }
+.pdf-btn {
+  padding: 6px 14px; border: 1px solid var(--accent); border-radius: 4px;
+  background: var(--accent); color: white; cursor: pointer; font-size: 12px; margin-right: 6px;
+}
+.pdf-btn.secondary { background: var(--bg); color: var(--accent); }
+.pdf-frame { width: 100%; height: 400px; border: 1px solid var(--border); border-radius: 4px; margin-top: 8px; }
+.related-list { list-style: none; margin: 8px 0; }
+.related-item {
+  padding: 6px 8px; font-size: 12px; cursor: pointer; color: var(--accent);
+  border-radius: 4px; transition: background 0.15s;
+}
+.related-item:hover { background: var(--accent); color: white; }
+.related-item::before { content: '\2192 '; font-weight: 700; }
+.footer {
+  padding: 6px 16px; font-size: 11px; color: var(--text-muted);
+  border-top: 1px solid var(--border); background: var(--bg-panel);
+  display: flex; justify-content: space-between;
+}
+</style>
+</head>
+<body x-data="explorer()" :data-theme="theme">
+
+<div class="header">
+  <h1>SOP Knowledge Explorer</h1>
+  <button class="theme-btn" @click="toggleTheme()" x-text="theme === 'light' ? 'Dark Mode' : 'Light Mode'"></button>
+</div>
+
+<div class="main">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <input type="text" class="search-box" placeholder="Search documents, sections, workflows..."
+           x-model="searchQuery" @input="onSearch()" @keydown.escape="clearSearch()">
+
+    <template x-if="searchQuery.length >= 2 && searchResults.length > 0">
+      <div class="search-results">
+        <template x-for="result in searchResults" :key="result.id + result.type">
+          <div class="search-result" @click="onSearchResultClick(result)">
+            <span class="type-badge" x-text="result.type"></span>
+            <span x-text="result.display"></span>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <div class="section-title">Workflows</div>
+    <template x-for="wf in workflows" :key="wf.id">
+      <div class="wf-item" :class="{ active: activeWorkflows.has(wf.id) }"
+           @click="toggleWorkflow(wf.id)">
+        <span>
+          <span class="wf-dot" :style="'background:' + wf.color"></span>
+          <span x-text="wf.title"></span>
+        </span>
+        <span class="wf-count" x-text="wf.doc_count"></span>
+      </div>
+    </template>
+
+    <div class="section-title">Document Type</div>
+    <div class="filter-group">
+      <template x-for="dt in docTypes" :key="dt">
+        <label>
+          <input type="checkbox" :value="dt" x-model="activeDocTypes" @change="applyFilters()">
+          <span x-text="dt"></span>
+        </label>
+      </template>
+    </div>
+  </div>
+
+  <!-- CENTER PANEL -->
+  <div class="center-panel">
+    <div class="graph-controls">
+      <button class="graph-btn" :class="{ active: graphMode === 'full' }" @click="setGraphMode('full')">Full Graph</button>
+      <button class="graph-btn" :class="{ active: graphMode === 'workflow' }" @click="setGraphMode('workflow')">Workflow</button>
+      <button class="graph-btn" @click="resetLayout()">Reset Layout</button>
+    </div>
+    <div id="cy"></div>
+    <div class="graph-stats">
+      <span x-text="visibleNodes + ' nodes'"></span> |
+      <span x-text="visibleEdges + ' edges'"></span> |
+      <span x-text="workflows.length + ' workflows'"></span>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <template x-if="!selectedDoc">
+      <div class="detail-empty">Click a node to view document details</div>
+    </template>
+    <template x-if="selectedDoc">
+      <div>
+        <div class="detail-header">
+          <div class="detail-id" x-text="selectedDoc.id"></div>
+          <div class="detail-title" x-text="selectedDoc.title"></div>
+        </div>
+        <dl class="detail-meta">
+          <dt>Type</dt><dd x-text="selectedDoc.doc_type"></dd>
+          <dt>Version</dt><dd x-text="selectedDoc.version || 'N/A'"></dd>
+          <dt>Owner</dt><dd x-text="selectedDoc.owner || 'N/A'"></dd>
+          <dt>Sections</dt><dd x-text="(selectedDoc.sections || []).length"></dd>
+        </dl>
+        <div>
+          <template x-for="wfId in selectedDoc.workflows" :key="wfId">
+            <span class="wf-tag" :style="'background:' + getWorkflowColor(wfId) + '22; color:' + getWorkflowColor(wfId)"
+                  x-text="getWorkflowTitle(wfId)"
+                  :title="'Filter graph to ' + getWorkflowTitle(wfId)"
+                  @click="focusWorkflow(wfId)"></span>
+          </template>
+        </div>
+
+        <template x-if="selectedDoc.sections && selectedDoc.sections.length > 0">
+          <div>
+            <div class="section-title" style="margin-top:16px">Sections</div>
+            <ul class="section-list">
+              <template x-for="sec in selectedDoc.sections" :key="sec.section_id">
+                <li class="section-item">
+                  <span class="level-indent" :style="'width:' + ((sec.level - 1) * 16) + 'px'"></span>
+                  <span x-text="sec.title"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+
+        <template x-if="selectedDoc.pdf_path">
+          <div class="pdf-section">
+            <div class="section-title">PDF Document</div>
+            <button class="pdf-btn" @click="showPdf = !showPdf" x-text="showPdf ? 'Hide PDF' : 'Embed PDF'"></button>
+            <a class="pdf-btn secondary" :href="selectedDoc.pdf_path" target="_blank">Open in New Tab</a>
+            <template x-if="showPdf">
+              <iframe class="pdf-frame" :src="selectedDoc.pdf_path"></iframe>
+            </template>
+          </div>
+        </template>
+
+        <template x-if="selectedDoc.related && selectedDoc.related.length > 0">
+          <div>
+            <div class="section-title" style="margin-top:16px">Related Documents (<span x-text="selectedDoc.related.length"></span>)</div>
+            <ul class="related-list">
+              <template x-for="rel in selectedDoc.related" :key="rel.id">
+                <li class="related-item" @click="selectNode(rel.id)">
+                  <span x-text="rel.id"></span> -- <span x-text="rel.title" style="color: var(--text-muted)"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>
+
+<div class="footer">
+  <span>{{ total_docs }} documents | {{ total_workflows }} workflows | {{ total_edges }} relationships</span>
+  <span>SOP Knowledge Explorer v1.0 | Generated {{ generated_date }}</span>
+</div>
+
+<script>
+const ELEMENTS = {{ elements_json }};
+const SEARCH_INDEX = {{ search_index_json }};
+const DOC_DETAILS = {{ doc_details_json }};
+const WORKFLOW_META = {{ workflow_meta_json }};
+const PDF_MAP = {{ pdf_map_json }};
+
+function explorer() {
+  return {
+    theme: 'light',
+    cy: null,
+    searchQuery: '',
+    searchResults: [],
+    graphMode: 'full',
+    activeWorkflows: new Set(),
+    activeDocTypes: ['SOP', 'Work Instruction', 'Guidance', 'Template', 'Job Aid'],
+    docTypes: ['SOP', 'Work Instruction', 'Guidance', 'Template', 'Job Aid'],
+    selectedDoc: null,
+    showPdf: false,
+    visibleNodes: 0,
+    visibleEdges: 0,
+    workflows: WORKFLOW_META,
+
+    init() {
+      this.cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: ELEMENTS,
+        style: [
+          { selector: 'node', style: {
+            'background-color': 'data(color)', 'label': 'data(label)',
+            'width': 'data(size)', 'height': 'data(size)',
+            'shape': 'data(shape)', 'font-size': '8px', 'color': '#666',
+            'text-valign': 'bottom', 'text-margin-y': 4,
+            'border-width': 0, 'overlay-padding': 4,
+          }},
+          { selector: 'node:selected', style: {
+            'border-width': 3, 'border-color': '#0d6efd',
+          }},
+          { selector: 'node.faded', style: { 'opacity': 0.2 }},
+          { selector: 'node.highlighted', style: {
+            'border-width': 3, 'border-color': '#ff6b6b',
+            'overlay-color': '#ff6b6b', 'overlay-padding': 6, 'overlay-opacity': 0.15,
+          }},
+          { selector: 'edge', style: {
+            'width': 1, 'line-color': '#ccc', 'curve-style': 'bezier',
+            'target-arrow-shape': 'triangle', 'target-arrow-color': '#ccc',
+            'arrow-scale': 0.6, 'opacity': 0.6,
+          }},
+          { selector: 'edge.highlighted', style: { 'line-color': '#666', 'width': 2, 'opacity': 1 }},
+          { selector: 'node.selected-neighbor', style: {
+            'border-width': 2, 'border-color': '#0d6efd', 'border-style': 'dashed', 'opacity': 1,
+          }},
+          { selector: 'edge.selected-neighbor', style: { 'line-color': '#0d6efd', 'width': 2, 'opacity': 0.8 }},
+          { selector: 'edge.faded', style: { 'opacity': 0.1 }},
+        ],
+        layout: { name: 'cose', animate: false, nodeRepulsion: 8000, idealEdgeLength: 80, gravity: 0.3 },
+        wheelSensitivity: 0.3,
+      });
+
+      const tooltip = document.getElementById('tooltip');
+      this.cy.on('mouseover', 'node', (e) => {
+        const node = e.target;
+        tooltip.innerHTML = '<strong>' + node.data('id') + '</strong><br>' + node.data('title');
+        tooltip.style.display = 'block';
+        node.connectedEdges().addClass('highlighted');
+      });
+      this.cy.on('mouseout', 'node', (e) => {
+        tooltip.style.display = 'none';
+        e.target.connectedEdges().removeClass('highlighted');
+      });
+      this.cy.on('mousemove', (e) => {
+        tooltip.style.left = (e.originalEvent.offsetX + 15) + 'px';
+        tooltip.style.top = (e.originalEvent.offsetY + 15) + 'px';
+      });
+      this.cy.on('tap', 'node', (e) => { this.selectNode(e.target.data('id')); });
+      this.cy.on('tap', (e) => { if (e.target === this.cy) { this.selectedDoc = null; this.cy.elements().removeClass('selected-neighbor'); } });
+
+      this.updateStats();
+    },
+
+    toggleTheme() { this.theme = this.theme === 'light' ? 'dark' : 'light'; },
+
+    onSearch() {
+      const q = this.searchQuery.toLowerCase().trim();
+      if (q.length < 2) { this.searchResults = []; this.cy.elements().removeClass('faded highlighted'); this.updateStats(); return; }
+      const results = [];
+      for (const wf of SEARCH_INDEX.workflows) {
+        if (wf.search_text.includes(q)) results.push({ id: wf.id, type: 'Workflow', display: wf.title, doc_id: null });
+      }
+      for (const doc of SEARCH_INDEX.documents) {
+        if (doc.search_text.includes(q)) results.push({ id: doc.id, type: 'Doc', display: doc.id + ' -- ' + doc.title, doc_id: doc.id });
+      }
+      for (const sec of SEARCH_INDEX.sections) {
+        if (sec.search_text.includes(q)) results.push({ id: sec.doc_id + '__' + sec.section_id, type: 'Section', display: sec.title.substring(0, 60) + ' -> ' + sec.doc_id, doc_id: sec.doc_id });
+      }
+      this.searchResults = results.slice(0, 50);
+      const matchIds = new Set(results.filter(r => r.doc_id).map(r => r.doc_id));
+      this.cy.nodes().forEach(n => {
+        if (matchIds.has(n.data('id'))) { n.removeClass('faded'); n.addClass('highlighted'); }
+        else { n.addClass('faded'); n.removeClass('highlighted'); }
+      });
+      this.cy.edges().addClass('faded');
+      this.updateStats();
+    },
+
+    clearSearch() {
+      this.searchQuery = '';
+      this.searchResults = [];
+      this.cy.elements().removeClass('faded highlighted');
+      this.updateStats();
+    },
+
+    onSearchResultClick(result) {
+      if (result.type === 'Workflow') { this.activeWorkflows.clear(); this.activeWorkflows.add(result.id); this.applyFilters(); }
+      else { this.selectNode(result.doc_id); }
+      this.searchResults = [];
+    },
+
+    toggleWorkflow(wfId) {
+      if (this.activeWorkflows.has(wfId)) this.activeWorkflows.delete(wfId);
+      else this.activeWorkflows.add(wfId);
+      this.applyFilters();
+    },
+
+    focusWorkflow(wfId) {
+      this.activeWorkflows.clear();
+      this.activeWorkflows.add(wfId);
+      this.applyFilters();
+    },
+
+    applyFilters() {
+      const hasWfFilter = this.activeWorkflows.size > 0;
+      this.cy.nodes().forEach(n => {
+        const wfMatch = !hasWfFilter || this.activeWorkflows.has(n.data('workflow'));
+        const typeMatch = this.activeDocTypes.includes(n.data('doc_type'));
+        if (wfMatch && typeMatch) n.show(); else n.hide();
+      });
+      this.cy.edges().forEach(e => {
+        if (e.source().visible() && e.target().visible()) e.show(); else e.hide();
+      });
+      this.updateStats();
+    },
+
+    setGraphMode(mode) {
+      this.graphMode = mode;
+      if (mode === 'full') { this.activeWorkflows.clear(); this.applyFilters(); }
+    },
+
+    resetLayout() {
+      this.cy.layout({ name: 'cose', animate: true, animationDuration: 500, nodeRepulsion: 8000, idealEdgeLength: 80, gravity: 0.3 }).run();
+    },
+
+    selectNode(docId) {
+      const detail = DOC_DETAILS[docId];
+      if (!detail) return;
+      this.selectedDoc = { ...detail, pdf_path: PDF_MAP[docId] || null };
+      this.showPdf = false;
+      const node = this.cy.getElementById(docId);
+      if (node.length) {
+        this.cy.elements().removeClass('selected-neighbor');
+        this.cy.nodes().unselect();
+        node.select();
+        node.connectedEdges().addClass('selected-neighbor');
+        node.neighborhood('node').addClass('selected-neighbor');
+        this.cy.animate({ center: { eles: node }, zoom: this.cy.zoom(), duration: 300 });
+      }
+    },
+
+    getWorkflowColor(wfId) { const wf = this.workflows.find(w => w.id === wfId); return wf ? wf.color : '#999'; },
+    getWorkflowTitle(wfId) { const wf = this.workflows.find(w => w.id === wfId); return wf ? wf.title : wfId; },
+
+    updateStats() {
+      this.visibleNodes = this.cy.nodes(':visible').length;
+      this.visibleEdges = this.cy.edges(':visible').length;
+    },
+  };
+}
+</script>
+</body>
+</html>

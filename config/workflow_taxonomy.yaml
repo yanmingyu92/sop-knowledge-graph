@@ -1,0 +1,221 @@
+# =============================================================================
+# SOP Workflow Taxonomy
+# =============================================================================
+# Defines lifecycle-based workflows for organizing pharmaceutical SOPs.
+# Each workflow contains documents that support specific phases of clinical trials.
+#
+# Structure:
+#   - id: Unique workflow identifier (used in code)
+#   - title: Human-readable workflow name
+#   - description: Purpose and scope
+#   - keywords: Terms for automatic document-to-workflow mapping
+# =============================================================================
+
+workflows:
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Initiation & Planning
+  # -------------------------------------------------------------------------
+  - id: study_setup
+    title: "Study Setup & Planning"
+    description: >
+      Initiate studies, create protocols, kickoff meetings, project orientation,
+      study folder setup, and team formation.
+    keywords:
+      - protocol
+      - kickoff
+      - orientation
+      - planning
+      - initiation
+      - study setup
+      - project setup
+      - team formation
+      - folder setup
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Data Collection & Management
+  # -------------------------------------------------------------------------
+  - id: data_collection
+    title: "Data Collection & Management"
+    description: >
+      EDC setup, data entry, source data verification, data quality checks,
+      query management, and database lock procedures.
+    keywords:
+      - EDC
+      - InForm
+      - data entry
+      - source data
+      - data quality
+      - query
+      - database lock
+      - data management
+      - CRF
+      - eCRF
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Data Transformation (CDISC)
+  # -------------------------------------------------------------------------
+  - id: data_transformation
+    title: "Data Transformation (SDTM/ADaM)"
+    description: >
+      Create SDTM datasets, ADaM datasets, define.xml, annotated CRFs,
+      dataset specifications, and CDISC compliance validation.
+    keywords:
+      - SDTM
+      - ADaM
+      - dataset
+      - transformation
+      - CDISC
+      - define.xml
+      - annotated CRF
+      - dataset specification
+      - mapping
+      - data standards
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Analysis & Reporting
+  # -------------------------------------------------------------------------
+  - id: analysis_reporting
+    title: "Statistical Analysis & Reporting"
+    description: >
+      Generate TLFs (tables, listings, figures), statistical analysis plans,
+      analysis programming, PK/PD analysis, and CSR support.
+    keywords:
+      - TLF
+      - tables
+      - listings
+      - figures
+      - statistical
+      - analysis
+      - SAP
+      - statistical analysis plan
+      - programming
+      - reporting
+      - CSR
+      - clinical study report
+      - mock-up
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Regulatory Submissions
+  # -------------------------------------------------------------------------
+  - id: regulatory_submission
+    title: "Regulatory Submissions"
+    description: >
+      Prepare regulatory packages, eSub format conversion, IND submissions,
+      BLA submissions, NDA submissions, and regulatory deliverables.
+    keywords:
+      - regulatory
+      - eSub
+      - IND
+      - BLA
+      - NDA
+      - submission
+      - FDA
+      - EMA
+      - regulatory deliverable
+      - regulatory package
+      - module
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Safety Monitoring
+  # -------------------------------------------------------------------------
+  - id: safety_monitoring
+    title: "Safety Monitoring & Pharmacovigilance"
+    description: >
+      Adverse event reporting, DMC (Data Monitoring Committee) operations,
+      safety analysis, DSMB support, and pharmacovigilance activities.
+    keywords:
+      - adverse event
+      - safety
+      - DMC
+      - data monitoring committee
+      - DSMB
+      - AE
+      - SAE
+      - serious adverse event
+      - pharmacovigilance
+      - safety monitoring
+      - patient narrative
+
+  # -------------------------------------------------------------------------
+  # Study Lifecycle Phase: Quality & Compliance
+  # -------------------------------------------------------------------------
+  - id: quality_compliance
+    title: "Quality Assurance & Compliance"
+    description: >
+      Quality checks, audits, inspection readiness, GxP compliance,
+      validation, and quality assurance procedures.
+    keywords:
+      - quality
+      - QA
+      - QC
+      - audit
+      - inspection
+      - compliance
+      - validation
+      - GxP
+      - GCP
+      - quality assurance
+      - quality control
+      - inspection readiness
+
+  # -------------------------------------------------------------------------
+  # Special Study Types: External Data & Real-World Evidence
+  # -------------------------------------------------------------------------
+  - id: external_data
+    title: "External Data & Real-World Evidence"
+    description: >
+      Real-world evidence studies, external data integration, RWDEx,
+      epidemiology, and observational studies.
+    keywords:
+      - RWE
+      - real-world evidence
+      - RWDEx
+      - external data
+      - external
+      - observational
+      - epidemiology
+      - real world
+      - non-interventional
+
+  # -------------------------------------------------------------------------
+  # Special Study Types: Medical Writing & Disclosure
+  # -------------------------------------------------------------------------
+  - id: medical_writing
+    title: "Medical Writing & Publications"
+    description: >
+      CSR authoring, investigator brochure, patient narratives,
+      publication support, and medical writing activities.
+    keywords:
+      - medical writing
+      - MW&D
+      - medical writer
+      - CSR
+      - clinical study report
+      - investigator brochure
+      - IB
+      - publication
+      - disclosure
+      - narrative
+      - patient narrative
+
+  # -------------------------------------------------------------------------
+  # Special Study Types: Specialized Analyses
+  # -------------------------------------------------------------------------
+  - id: special_studies
+    title: "Special Study Types & Analyses"
+    description: >
+      Oncology studies, PK/PD analysis, HTA (Health Technology Assessment),
+      biomarkers, imaging, and specialized therapeutic areas.
+    keywords:
+      - oncology
+      - PK
+      - pharmacokinetic
+      - PD
+      - pharmacodynamic
+      - HTA
+      - health technology assessment
+      - biomarker
+      - imaging
+      - pharmacology
+      - vaccine
+      - RECIST
